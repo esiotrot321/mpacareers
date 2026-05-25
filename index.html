@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>What Kind of Kaki Are You in the Little Red Dot? – Pixel Port Quiz</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Google font example (optional): Press Start 2P -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+  <style>
+    /* BASIC RESET */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      font-family: "Press Start 2P", system-ui, sans-serif;
+      background: #000;
+      color: #fff;
+    }
+
+    /* FIXED PIXEL HARBOR BACKGROUND WRAPPER */
+    .quiz-page {
+      min-height: 100vh;
+      background-image: url("harbor-bg.png"); /* your generated background */
+      background-size: cover;
+      background-position: center center;
+      background-attachment: fixed;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 30px 15px;
+    }
+
+    /* MAIN CONTENT BOX */
+    .quiz-container {
+      background: rgba(10, 10, 40, 0.82);
+      border: 4px solid #ffffff;
+      box-shadow: 0 0 0 4px #333366;
+      max-width: 900px;
+      width: 100%;
+      padding: 30px 20px;
+      border-radius: 8px;
+      position: relative;
+    }
+
+    /* PAGE VISIBILITY */
+    .quiz-step {
+      display: none;
+    }
+
+    .quiz-step.active {
+      display: block;
+    }
+
+    /* START SCREEN */
+    .start-screen {
+      text-align: center;
+    }
+
+    .start-title {
+      font-size: 20px;
+      letter-spacing: 2px;
+      margin-bottom: 18px;
+      text-shadow: 3px 3px 0 #000000, 5px 5px 0 #202020;
+    }
+
+    .start-subtitle {
+      font-size: 10px;
+      line-height: 1.4;
+      max-width: 520px;
+      margin: 0 auto 25px;
+    }
+
+    .start-cta {
+      display: inline-block;
+      padding: 16px 30px;
+      border: 4px solid #ffffff;
+      background: #1a8cff;
+      color: #ffffff;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      cursor: pointer;
+      box-shadow: 0 0 0 4px #0050aa;
+      animation: pulse 1s infinite alternate;
+    }
+
+    @keyframes pulse {
+      from {
+        transform: scale(1);
+        box-shadow: 0 0 0 4px #0050aa;
+      }
+      to {
+        transform: scale(1.06);
+        box-shadow: 0 0 0 4px #ffffff;
+      }
+    }
+
+    .start-cta:hover {
+      background: #40a9ff;
+    }
+
+    /* PROGRESS BAR */
+    .quiz-progress {
+      margin-bottom: 18px;
+      display: none;
+    }
+
+    .quiz-progress.visible {
+      display: block;
+    }
+
+    .quiz-progress-bar {
+      width: 100%;
+      height: 10px;
+      border: 2px solid #ffffff;
+      background: #111133;
+      position: relative;
+      margin-bottom: 8px;
+    }
+
+    .quiz-progress-fill {
+      height: 100%;
+      background: #1a8cff;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .quiz-progress-text {
+      font-size: 9px;
+      text-align: right;
+    }
+
+    /* QUESTION PAGES */
+    .quiz-title {
+      font-size: 18px;
+      text-align: center;
+      margin-bottom: 18px;
+      letter-spacing: 2px;
+    }
+
+    .quiz-question {
+      font-size: 13px;
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .quiz-option {
+      padding: 10px 12px;
+      border: 2px solid #ffffff;
+      background: rgba(15, 15, 60, 0.9);
+      cursor: pointer;
+      font-size: 11px;
+      text-align: left;
+      line-height: 1.4;
+    }
+
+    .quiz-option:hover {
+      background: rgba(30, 30, 100, 0.95);
+    }
+
+    .quiz-option.selected {
+      background: rgba(255, 217, 102, 0.95);
+      color: #000;
+      border-color: #ffd966;
+      box-shadow: 0 0 0 3px #ffd966;
+    }
+
+    /* NAV BUTTONS */
+    .quiz-nav {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 25px;
+      gap: 10px;
+    }
+
+    .quiz-btn {
+      flex: 1;
+      text-align: center;
+      padding: 12px 16px;
+      border: 3px solid #ffffff;
+      background: #2626a3;
+      color: #ffffff;
+      text-decoration: none;
+      cursor: pointer;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 0 0 3px #13135a;
+    }
+
+    .quiz-btn:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+
+    .quiz-btn:hover:not(:disabled) {
+      background: #3c3ccf;
+    }
+
+    /* RESULTS PAGE */
+    .results-title {
+      font-size: 18px;
+      text-align: center;
+      margin-bottom: 10px;
+      letter-spacing: 2px;
+    }
+
+    .results-subtitle {
+      font-size: 11px;
+      text-align: center;
+      margin-bottom: 16px;
+      line-height: 1.4;
+    }
+
+    .top-role-line {
+      font-size: 11px;
+      margin-bottom: 6px;
+    }
+
+    .top-role-name {
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .top-role-description {
+      font-size: 11px;
+      line-height: 1.5;
+      margin-bottom: 10px;
+    }
+
+    .results-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      margin-top: 20px;
+    }
+
+    .results-grid-heading {
+      font-size: 11px;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    /* ROLE CARDS */
+    .role-card {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 12px 14px;
+      background: rgba(10, 10, 50, 0.9);
+      border: 2px solid #ffffff;
+    }
+
+    /* CHARACTER ICONS */
+    .role-character {
+      width: 64px;
+      height: 64px;
+      flex-shrink: 0;
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: contain;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+
+    /* Map to your 6 images */
+    .role-character.de  { background-image: url("char-de.png"); }
+    .role-character.sb  { background-image: url("char-sb.png"); }
+    .role-character.sf  { background-image: url("char-sf.png"); }
+    .role-character.vto { background-image: url("char-vto.png"); }
+    .role-character.pi  { background-image: url("char-pi.png"); }
+    .role-character.hs  { background-image: url("char-hs.png"); }
+
+    .role-info {
+      flex: 1;
+    }
+
+    .role-name {
+      font-size: 13px;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    .role-description {
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    /* HIGHLIGHTED ROLE (USER RESULT) */
+    .role-card.highlighted {
+      transform: scale(1.06);
+      border-width: 3px;
+      box-shadow: 0 0 0 3px #ffd966;
+      background: rgba(40, 20, 80, 0.98);
+    }
+
+    .role-card.highlighted .role-character {
+      width: 80px;
+      height: 80px;
+    }
+
+    .role-card.highlighted .role-name {
+      font-size: 14px;
+    }
+
+    .role-card.highlighted .role-description {
+      font-size: 12px;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 600px) {
+      .quiz-container {
+        padding: 20px 15px;
+      }
+
+      .start-title {
+        font-size: 16px;
+      }
+
+      .quiz-title {
+        font-size: 16px;
+      }
+
+      .role-card {
+        align-items: flex-start;
+      }
+
+      .role-character {
+        width: 56px;
+        height: 56px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="quiz-page">
+    <div class="quiz-container">
+
+      <!-- PROGRESS BAR (hidden on start & results, shown on questions) -->
+      <div class="quiz-progress" id="quiz-progress">
+        <div class="quiz-progress-bar">
+          <div class="quiz-progress-fill" id="quiz-progress-fill"></div>
+        </div>
+        <div class="quiz-progress-text" id="quiz-progress-text">
+          Question 1 of 10
+        </div>
+      </div>
+
+      <!-- STEP 1: START SCREEN -->
+      <section class="quiz-step start-screen active" data-step="1">
+        <h1 class="start-title">WHAT KIND OF KAKI ARE YOU IN THE LITTLE RED DOT?</h1>
+        <p class="start-subtitle">
+          Answer some everyday Singapore scenarios – from MRT breakdowns to late-night suppers –
+          and we’ll quietly match you to a role in Singapore’s maritime world.
+        </p>
+        <button class="start-cta" data-next-step="2">Start Quiz</button>
+      </section>
+
+      <!-- QUESTIONS (steps 2–11) -->
+
+      <!-- Q1 – Step 2 -->
+      <section class="quiz-step" data-step="2" data-question-index="0">
+        <h2 class="quiz-title">Question 1</h2>
+        <div class="quiz-question">
+          Your gang is planning a big chalet at East Coast Park. What do you naturally end up in charge of?
+        </div>
+        <div class="quiz-options">
+          <button class="quiz-option" data-role="DE">
+            Designing fun games, setting up fairy lights, and figuring out how to power everything safely.
+          </button>
+          <button class="quiz-option" data-role="SB">
+            Calling to book the pit, asking for discounts, and sourcing sponsors for snacks and drinks.
+          </button>
+          <button class="quiz-option" data-role="SF">
+            Volunteering for overnight BBQ duty, happily tending the fire and guarding everyone’s stuff.
+          </button>
+          <button class="quiz-option" data-role="VTO">
+            Creating the timetable, tracking who’s bringing what, and planning backup plans if it rains.
+          </button>
+        </div>
+
+        <div class="quiz-nav">
+          <button class="quiz-btn" data-prev-step="1">Back</button>
+          <button class="quiz-btn" data-next-step="3" disabled>Next</button>
+        </div>
+      </section>
+
+      <!-- Q2 – Step 3 -->
+      <section class="quiz-step" data-step="3" data-question-index="1">
+        <h2 class="quiz-title">Question 2</h2>
+        <div class="quiz-question">
+          On the way to an important interview, the MRT suddenly breaks down. How do you react?
+        </div>
+        <div class="quiz-options">
+          <button class="quiz-option" data-role="HS">
+            Open your map apps, calculate alternative routes, and factor in walking time and the weather.
+          </button>
+          <button class="quiz-option" data-role="SB">
+            Start chatting with people around you, jio them to share a Grab, and split the fare smartly.
+          </button>
+          <button class="quiz-option" data-role="SF">
+            Decide to walk from the next station, enjoying the unexpected detour and fresh air.
+          </button>
+          <button class="quiz-option" data-role="VTO">
+            Call the company, calmly explain the situation, suggest a realistic new arrival time, and keep them updated.
+          </button>
+        </div>
+
+        <div class="quiz-nav">
+          <button class="quiz-btn" data-prev-step="2">Back</button>
+          <button class="quiz-btn" data-next-step="4" disabled>Next</button>
+        </div>
+      </section>
+
+      <!-- Q3 – Step 4 -->
+      <section class="quiz-step" data-step="4" data-question-index="2">
+        <h2 class="quiz-title">Question 3</h2>
+        <div class="quiz-question">
+          You’re watching National Day fireworks at Marina Bay when you notice a lost, crying child nearby. What do you do?
+        </div>
+        <div class="quiz-options">
+          <button class="quiz-option" data-role="PI">
+            Gently approach, comfort the child, get details, and help reunite them with their family.
+          </button>
+          <button class="quiz-option" data-role="VTO">
+            Suggest clear meeting points for your own group, send photos of landmarks in the group chat, and make sure nobody gets separated.
+          </button>
+          <button class="quiz-option" data-role="HS">
+            Quickly scan the area, identify a less crowded path, and guide people away from the crush.
+          </button>
+          <button class="quiz-option" data-role="DE">
+            Observe how the crowd moves, think about how the viewing area layout could be improved, and mentally “redesign” the whole setup.
+          </button>
+        </div>
+
+        <div class="quiz-nav">
+          <button class="quiz-btn" data-prev-step="3">Back</button>
+          <button class="quiz-btn" data-next-step="5" disabled>Next</button>
+        </div>
+      </section>
+
+      <!-- Q4 – Step 5 -->
+      <section class="quiz-step" data-step="5" data-question-index="3">
+        <h2 class="quiz-title">Question 4</h2>
+        <div class="quiz-question">
+          Last-minute chaos: your group project is due tomorrow and the work is all over the place. You tend to…
+        </div>
+        <div class="quiz-options">
+          <button class="quiz-option" data-role="VTO">
+            Take charge of the schedule, assign tasks, and keep everyone on track till submission.
+          </button>
+          <button class="quiz-option" data-role="DE">
+            Dive deep into the research or prototype, making sure what you build actually works.
+          </button>
+          <button class="quiz-option" data-role="SB">
+            Be the one presenting, answering tough questions confidently and selling the idea to the lecturer.
+          </button>
+          <button class="quiz-option" data-role="PI">
+            Check if the project meets all the rubric points, polish formatting, and ensure there’s no plagiarism or missing sections.
+          </button>
+        </div>
+
+        <div class="quiz-nav">
+          <button class="quiz-btn" data-prev-step="4">Back</button>
+          <button class="quiz-btn" data-next-step="6" disabled>Next</button>
+        </div>
+      </section>
+
+      <!-- Q5 – Step 6 -->
+      <section class="quiz-step" data-step="6" data-question-index="4">
+        <h2 class="quiz-title">Question 5</h2>
+        <div class="quiz-question">
+          You’re having a picnic at Botanic Gardens when a sudden thunderstorm hits. What’s your first instinct?
+        </div>
+        <div class="quiz-options">
+          <button class="quiz-option" data-role="PI">
+            Herd everyone to a safe shelter, check that no one is left behind, and watch out for slippery spots.
+          </button>
+          <button class="quiz-option" data-role="HS">
+            Open the weather radar, track the rain clouds, and estimate how long the storm will last.
+          </button>
+          <button class="quiz-option" data-role="SF">
+            Laugh, grab your stuff, and suggest turning it into an “adventure walk in the rain” before heading for hot drinks.
+          </button>
+          <button class="quiz-option" data-role="PI">
+            Make sure kids and elderly people nearby are okay, share umbrellas or ponchos, and ask if they need help.
+          </button>
+        </div>
+
+        <div class="quiz-nav">
+          <button class="quiz-btn" data-prev-step="5">Back</button>
+          <button class="quiz-btn" data-next-step="7" disabled>Next</button>
+        </div>
+      </section>
+
+      <!-- Q6 – Step 7 -->
+      <section class="quiz-step" data-step="7" data-question-index="5">
+        <h2 class="quiz-title">Question 6</h2>
+        <div class="quiz-question">
+          You and your friends try a new escape room in Bugis. What role do you slip into?
+        </div>
+        <div class="quiz-options">
+          <button class="quiz-option" data-role="HS">
+            The puzzle-solver who notices patterns, cracks codes, and figures out weird clues.
+          </button>
+          <button class="quiz-option" data-role="SF">
+            The hands-on explorer who checks every drawer, climbs around (safely), and tests every suspicious object.
+          </button>
+          <button class="quiz-option" data-role="VTO">
+            The timekeeper and coordinator, assigning corners to people and deciding when to ask for hints.
+          </button>
+          <button class="quiz-option" data-role="SB">
+            The negotiator who keeps group morale high, mediates between ideas, and chats up the game master.
+          </button>
+        </div>
+
+        <div class="quiz-nav">
+          <button class="quiz-btn" data-prev-step="6">Back</button>
+          <button class="quiz-btn" data-next-step="8" disabled>Next</button>
+        </div>
+      </section>
+
+      <!-- Q7 – Step 8 -->
+      <section class="quiz-step" data-step="8" data-question-index="6">
+        <h2 class="quiz-title">Question 7</h2>
+        <div class="quiz-question">
+          You sign up for a community beach cleanup. How do you contribute?
+        </div>
+        <div class="quiz-options">
+          <button class="quiz-option" data-role="DE">
+            Design an efficient way to sort trash, maybe even suggest a simple system or app to record what’s collected.
+          </button>
+          <button class="quiz-option" data-role="PI">
+            Walk around checking that volunteers are using gloves properly, watch out for sharp objects, and flag any hazards.
+          </button>
+          <button class="quiz-option" data-role="SF">
+            Go straight for the tricky spots, hauling heavy bags and climbing rocks to reach stubborn litter.
+          </button>
+          <button class="quiz-option" data-role="SB">
+            Talk to sponsors, media, and organisers, persuading them to support more cleanups in future.
+          </button>
+        </div>
+
+        <div class="quiz-nav">
+          <button class="quiz-btn" data-prev-step="7">Back</button>
+          <button class="quiz-btn" data-next-step="9" disabled>Next</button>
+        </div>
+      </section>
+
+      <!-- Q8 – Step 9 -->
+      <section class="quiz-step" data-step="9" data-question-index="7">
+        <h2 class="quiz-title">Question 8</h2>
+        <div class="quiz-question">
+          It’s late-night supper time at Changi Village. What are you busy doing?
+        </div>
+        <div class="quiz-options">
+          <button class="quiz-option" data-role="HS">
+            Comparing different stalls’ reviews, prices, and portions, then recommending who should order what.
+          </button>
+          <button class="quiz-option" data-role="SB">
+            Convincing your friends to try a new stall, negotiating to share dishes so everyone can taste more food.
+          </button>
+          <button class="quiz-option" data-role="SF">
+            Quietly enjoying the cool night breeze, volunteering to dabao for others, and taking your time on the walk.
+          </button>
+          <button class="quiz-option" data-role="PI">
+            Checking last bus/train timings, coordinating rides home, and making sure no one ends up stranded.
+          </button>
+        </div>
+
+        <div class="quiz-nav">
+          <button class="quiz-btn" data-prev-step="8">Back</button>
+          <button class="quiz-btn" data-next-step="10" disabled>Next</button>
+        </div>
+      </section>
+
+      <!-- Q9 – Step 10 -->
+      <section class="quiz-step" data-step="10" data-question-index="8">
+        <h2 class="quiz-title">Question 9</h2>
+        <div class="quiz-question">
+          Your phone storage is almost full of random photos and screenshots. How do you deal with it?
+        </div>
+        <div class="quiz-options">
+          <button class="quiz-option" data-role="DE">
+            Set up folders, cloud backups, and maybe experiment with a new app to keep things organised.
+          </button>
+          <button class="quiz-option" data-role="SB">
+            Carefully pick a few best shots to post, write catchy captions, and engage with comments.
+          </button>
+          <button class="quiz-option" data-role="HS">
+            Delete anything that doesn’t tell a clear story, keeping only the photos that really matter to you.
+          </button>
+          <button class="quiz-option" data-role="VTO">
+            Systematically archive important documents and screenshots into labelled folders for easy access later.
+          </button>
+        </div>
+
+        <div class="quiz-nav">
+          <button class="quiz-btn" data-prev-step="9">Back</button>
+          <button class="quiz-btn" data-next-step="11" disabled>Next</button>
+        </div>
+      </section>
+
+      <!-- Q10 – Step 11 -->
+      <section class="quiz-step" data-step="11" data-question-index="9">
+        <h2 class="quiz-title">Question 10</h2>
+        <div class="quiz-question">
+          A close friend is having a mini “What am I doing with my life?” crisis over kopi.
+        </div>
+        <div class="quiz-options">
+          <button class="quiz-option" data-role="HS">
+            Listen patiently, break down their options, and help them weigh pros and cons logically.
+          </button>
+          <button class="quiz-option" data-role="SB">
+            Give a motivating pep talk, share contacts, and offer to introduce them to useful people.
+          </button>
+          <button class="quiz-option" data-role="SF">
+            Encourage them to explore: travel, try new experiences, and learn to handle uncertainty.
+          </button>
+          <button class="quiz-option" data-role="PI">
+            Help them think through practical backup plans, like finances and commitments, so they feel safer making choices.
+          </button>
+        </div>
+
+        <div class="quiz-nav">
+          <button class="quiz-btn" data-prev-step="10">Back</button>
+          <button class="quiz-btn" data-next-step="12" disabled>See Result</button>
+        </div>
+      </section>
+
+      <!-- FINAL STEP – RESULTS (Step 12) -->
+      <section class="quiz-step results-screen" data-step="12">
+        <h2 class="results-title">Your Port Persona</h2>
+        <p class="results-subtitle" id="results-subtitle">
+          You are closely aligned to: <span id="top-role-name-inline"></span>
+        </p>
+
+        <!-- Top role description -->
+        <div class="top-role-line">Here’s how this maritime role fits your style:</div>
+        <div class="top-role-name" id="top-role-name-block"></div>
+        <div class="top-role-description" id="top-role-description"></div>
+
+        <!-- All roles list -->
+        <div class="results-grid">
+          <div class="results-grid-heading">Other maritime roles and how you match them:</div>
+
+          <!-- DE -->
+          <div class="role-card" id="role-de" data-role="DE">
+            <div class="role-character de"></div>
+            <div class="role-info">
+              <div class="role-name">Design Engineer / Operations Specialist (DE)</div>
+              <div class="role-description">
+                You enjoy marrying technology, creativity and logic to fix real-world problems.
+                In the maritime world, Design Engineers and Operations Specialists help design
+                and run smarter, greener and more efficient ships and port systems – from
+                exploring cleaner fuels to digital tools that make ships and ports safer and
+                more sustainable.
+              </div>
+            </div>
+          </div>
+
+          <!-- SB -->
+          <div class="role-card" id="role-sb" data-role="SB">
+            <div class="role-character sb"></div>
+            <div class="role-info">
+              <div class="role-name">Ship Broker (SB)</div>
+              <div class="role-description">
+                You’re a natural people person who enjoys convincing others and making win–win
+                deals. Ship Brokers help match ships with cargo around the world, working
+                across cultures and time zones. They blend sharp commercial instincts with
+                strong communication skills to keep global trade moving.
+              </div>
+            </div>
+          </div>
+
+          <!-- SF -->
+          <div class="role-card" id="role-sf" data-role="SF">
+            <div class="role-character sf"></div>
+            <div class="role-info">
+              <div class="role-name">Seafarer (SF)</div>
+              <div class="role-description">
+                Independent and adventurous, you’re resilient at sea and enjoy seeing the world
+                from port to port. You value quiet off-grid time and strong camaraderie with
+                your crew as you handle cargo operations, maintenance and navigation together.
+              </div>
+            </div>
+          </div>
+
+          <!-- VTO -->
+          <div class="role-card" id="role-vto" data-role="VTO">
+            <div class="role-character vto"></div>
+            <div class="role-info">
+              <div class="role-name">Vessel Traffic Officer (VTO)</div>
+              <div class="role-description">
+                You stay calm under pressure and think clearly when things get messy.
+                Vessel Traffic Officers monitor ship movements, maintain navigational
+                safety and respond quickly when unexpected situations occur – giving
+                clear instructions and advice to keep everyone safe.
+              </div>
+            </div>
+          </div>
+
+          <!-- PI -->
+          <div class="role-card" id="role-pi" data-role="PI">
+            <div class="role-character pi"></div>
+            <div class="role-info">
+              <div class="role-name">Port Inspector (PI)</div>
+              <div class="role-description">
+                You’re protective by nature and pay attention to people’s well-being.
+                Port Inspectors act as first responders for incidents at sea or in port,
+                checking safety standards and coordinating with agencies such as the
+                police and coast guard to help people in distress and enforce rules.
+              </div>
+            </div>
+          </div>
+
+          <!-- HS -->
+          <div class="role-card" id="role-hs" data-role="HS">
+            <div class="role-character hs"></div>
+            <div class="role-info">
+              <div class="role-name">Hydrographic Surveyor (HS)</div>
+              <div class="role-description">
+                You’re analytical and like making sense of data. Hydrographic Surveyors
+                measure sea depths and the shape of the seabed to help update nautical
+                charts. They’re the ones who can “see” what’s going on under the water’s
+                surface, helping ships navigate safely and supporting coastal development
+                and environmental projects.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="quiz-nav" style="margin-top: 24px;">
+          <button class="quiz-btn" data-prev-step="11">Back</button>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <script>
+    // --- STATE ---
+    const totalQuestions = 10;
+    const answers = new Array(totalQuestions).fill(null); // store role per question
+
+    // --- ELEMENTS ---
+    const steps = document.querySelectorAll(".quiz-step");
+    const progressBar = document.getElementById("quiz-progress");
+    const progressFill = document.getElementById("quiz-progress-fill");
+    const progressText = document.getElementById("quiz-progress-text");
+
+    const resultsSubtitle = document.getElementById("results-subtitle");
+    const topRoleNameInline = document.getElementById("top-role-name-inline");
+    const topRoleNameBlock = document.getElementById("top-role-name-block");
+    const topRoleDescription = document.getElementById("top-role-description");
+    const roleCards = document.querySelectorAll(".role-card");
+
+    // Role descriptions for the top-line text (reuse from cards)
+    const roleMeta = {
+      DE: {
+        name: "Design Engineer / Operations Specialist (DE)",
+        description:
+          "You enjoy marrying technology, creativity and logic to fix real-world problems. In the maritime world, Design Engineers and Operations Specialists help design and run smarter, greener and more efficient ships and port systems – from exploring cleaner fuels to digital tools that make ships and ports safer and more sustainable.",
+      },
+      SB: {
+        name: "Ship Broker (SB)",
+        description:
+          "You’re a natural people person who enjoys convincing others and making win–win deals. Ship Brokers help match ships with cargo around the world, working across cultures and time zones. They blend sharp commercial instincts with strong communication skills to keep global trade moving.",
+      },
+      SF: {
+        name: "Seafarer (SF)",
+        description:
+          "Independent and adventurous, you’re resilient at sea and enjoy seeing the world from port to port. You value quiet off-grid time and strong camaraderie with your crew as you handle cargo operations, maintenance and navigation together.",
+      },
+      VTO: {
+        name: "Vessel Traffic Officer (VTO)",
+        description:
+          "You stay calm under pressure and think clearly when things get messy. Vessel Traffic Officers monitor ship movements, maintain navigational safety and respond quickly when unexpected situations occur – giving clear instructions and advice to keep everyone safe.",
+      },
+      PI: {
+        name: "Port Inspector (PI)",
+        description:
+          "You’re protective by nature and pay attention to people’s well-being. Port Inspectors act as first responders for incidents at sea or in port, checking safety standards and coordinating with agencies such as the police and coast guard to help people in distress and enforce rules.",
+      },
+      HS: {
+        name: "Hydrographic Surveyor (HS)",
+        description:
+          "You’re analytical and like making sense of data. Hydrographic Surveyors measure sea depths and the shape of the seabed to help update nautical charts. They’re the ones who can “see” what’s going on under the water’s surface, helping ships navigate safely and supporting coastal development and environmental projects.",
+      },
+    };
+
+    // --- HELPERS ---
+    function showStep(stepNumber) {
+      steps.forEach((stepEl) => {
+        stepEl.classList.toggle("active", stepEl.dataset.step === String(stepNumber));
+      });
+
+      // Show progress bar only on question steps 2–11
+      if (stepNumber >= 2 && stepNumber <= 11) {
+        progressBar.classList.add("visible");
+        const questionIndex = stepNumber - 2; // 0-based
+        const current = questionIndex + 1;
+        const percent = Math.round((current / totalQuestions) * 100);
+        progressFill.style.width = percent + "%";
+        progressText.textContent = `Question ${current} of ${totalQuestions}`;
+      } else {
+        progressBar.classList.remove("visible");
+      }
+
+      // If we are entering the results step, compute and render result
+      if (stepNumber === 12) {
+        computeAndShowResult();
+      }
+    }
+
+    function setAnswer(questionIndex, roleId) {
+      answers[questionIndex] = roleId;
+    }
+
+    function getScores() {
+      const scores = { DE: 0, SB: 0, SF: 0, VTO: 0, PI: 0, HS: 0 };
+      answers.forEach((roleId) => {
+        if (roleId && scores[roleId] != null) {
+          scores[roleId] += 1;
+        }
+      });
+      return scores;
+    }
+
+    function computeAndShowResult() {
+      const scores = getScores();
+      const entries = Object.entries(scores);
+      const maxScore = Math.max(...entries.map(([, s]) => s));
+      const topEntry = entries.find(([, s]) => s === maxScore);
+      const [topRoleId] = topEntry;
+
+      const top = roleMeta[topRoleId];
+
+      // Update top role texts
+      topRoleNameInline.textContent = top.name;
+      topRoleNameBlock.textContent = top.name;
+      topRoleDescription.textContent = top.description;
+
+      // Highlight top role card
+      roleCards.forEach((card) => {
+        if (card.dataset.role === topRoleId) {
+          card.classList.add("highlighted");
+        } else {
+          card.classList.remove("highlighted");
+        }
+      });
+    }
+
+    // --- EVENT DELEGATION FOR BUTTONS ---
+    document.addEventListener("click", (e) => {
+      const target = e.target;
+
+      // Start button / general next-step
+      if (target.matches("[data-next-step]")) {
+        const nextStep = parseInt(target.getAttribute("data-next-step"), 10);
+
+        // If moving forward from a question, ensure it has an answer
+        const currentSection = target.closest(".quiz-step");
+        if (currentSection && currentSection.hasAttribute("data-question-index")) {
+          const qIndex = parseInt(currentSection.getAttribute("data-question-index"), 10);
+          if (!answers[qIndex]) {
+            // no answer yet – ignore
+            return;
+          }
+        }
+
+        showStep(nextStep);
+      }
+
+      // Prev-step
+      if (target.matches("[data-prev-step]")) {
+        const prevStep = parseInt(target.getAttribute("data-prev-step"), 10);
+        showStep(prevStep);
+      }
+
+      // Option selection
+      if (target.matches(".quiz-option")) {
+        const section = target.closest(".quiz-step");
+        if (!section) return;
+        if (!section.hasAttribute("data-question-index")) return;
+
+        const qIndex = parseInt(section.getAttribute("data-question-index"), 10);
+        const roleId = target.getAttribute("data-role");
+        setAnswer(qIndex, roleId);
+
+        // Visual selection
+        section.querySelectorAll(".quiz-option").forEach((btn) => {
+          btn.classList.toggle("selected", btn === target);
+        });
+
+        // Enable "Next" button on this step
+        const nextBtn = section.querySelector("[data-next-step]");
+        if (nextBtn) {
+          nextBtn.disabled = false;
+        }
+      }
+    });
+
+    // Initialize on load (shows step 1 by default)
+    showStep(1);
+  </script>
+</body>
+</html>
